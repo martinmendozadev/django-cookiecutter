@@ -1,0 +1,66 @@
+version: '3'
+
+volumes:
+  production_postgres_data: {}
+  production_postgres_data_backups: {}
+  production_caddy: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: proyect_production_django      # Change string 'proyect' for your proyect_name
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: proyect_production_postgres    # Change string 'proyect' for your proyect_name
+    volumes:
+      - production_postgres_data:/var/lib/postgresql/data
+      - production_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.production/.postgres
+
+  caddy:
+    build:
+      context: .
+      dockerfile: ./compose/production/caddy/Dockerfile
+    image: proyect_production_caddy       # Change string 'proyect' for your proyect_name
+    depends_on:
+      - django
+    volumes:
+      - production_caddy:/root/.caddy
+    env_file:
+      - ./.envs/.production/.caddy
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+
+  redis:
+    image: redis:3.2
+
+  celeryworker:
+    <<: *django
+    image: proyect_production_celeryworker  # Change string 'proyect' for your proyect_name
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: proyect_production_celerybeat    # Change string 'proyect' for your proyect_name
+    command: /start-celerybeat
+
+  flower:
+    <<: *django
+    image: proyect_production_flower        # Change string 'proyect' for your proyect_name
+    ports:
+      - "5555:5555"
+    command: /start-flower
