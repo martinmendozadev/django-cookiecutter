@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: project_local_django           # Change string 'proyect' for your proyect_name
+    image: project_local_django           # Change string 'project' for your project_name
     depends_on:
       - postgres
     volumes:
@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
-    image: project_production_postgres    # Change string 'proyect' for your proyect_name
+    image: project_production_postgres    # Change string 'project' for your project_name
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
@@ -33,31 +33,31 @@ services:
       - ./.envs/.local/.postgres
 
   redis:
-    image: redis:3.2
+    image: redis:5.0
 
   celeryworker:
     <<: *django
-    image: project_local_celeryworker   # Change string 'proyect' for your proyect_name
+    image: project_local_celeryworker   # Change string 'project' for your project_name
     depends_on:
       - redis
       - postgres
-      
+
     ports: []
     command: /start-celeryworker
 
   celerybeat:
     <<: *django
-    image: project_local_celerybeat     # Change string 'proyect' for your proyect_name
+    image: project_local_celerybeat     # Change string 'project' for your project_name
     depends_on:
       - redis
       - postgres
-      
+
     ports: []
     command: /start-celerybeat
 
   flower:
     <<: *django
-    image: project_local_flower         # Change string 'proyect' for your proyect_name
+    image: project_local_flower         # Change string 'project' for your project_name
     ports:
       - "5555:5555"
     command: /start-flower
