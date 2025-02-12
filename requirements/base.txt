@@ -23,4 +23,4 @@ celery==4.4.2
 flower==1.2.0
 
 # Django REST Framework
-djangorestframework==3.11.2
+djangorestframework==3.15.2
